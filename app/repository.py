@@ -24,15 +24,7 @@ def list_products(
     page: int = 1,
     page_size: int = 20,
 ) -> list[Product]:
-    products = PRODUCTS.copy()
-
-    if q is not None:
-        needle = q.casefold()
-        products = [
-            product
-            for product in products
-            if needle in product.name.casefold() or needle in product.category.casefold()
-        ]
+    products = _filter_products(q=q)
 
     products.sort(key=lambda product: getattr(product, sort), reverse=order == "desc")
 
@@ -42,16 +34,20 @@ def list_products(
 
 
 def count_products(*, q: str | None = None) -> int:
-    if q is None:
-        return len(PRODUCTS)
-
-    needle = q.casefold()
-    return sum(
-        1
-        for product in PRODUCTS
-        if needle in product.name.casefold() or needle in product.category.casefold()
-    )
+    return len(_filter_products(q=q))
 
 
 def get_product(product_id: int) -> Product | None:
     return next((product for product in PRODUCTS if product.id == product_id), None)
+
+
+def _filter_products(*, q: str | None = None) -> list[Product]:
+    if q is None:
+        return PRODUCTS.copy()
+
+    needle = q.casefold()
+    return [
+        product
+        for product in PRODUCTS
+        if needle in product.name.casefold() or needle in product.category.casefold()
+    ]
