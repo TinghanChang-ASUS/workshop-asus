@@ -9,11 +9,13 @@ from app.repository import list_sales_products
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
-def calculate_total(formula: Literal["total"], items: list[Product]) -> float:
-    if formula == "total":
-        return sum((item.price for item in items), start=0.0)
+def sum_prices(items: list[Product]) -> float:
+    return sum((item.price for item in items), start=0.0)
 
-    raise AssertionError("Unsupported formula")
+
+def calculate_total(formula: Literal["total"], items: list[Product]) -> float:
+    calculators = {"total": sum_prices}
+    return calculators[formula](items)
 
 
 @router.get("/sales", response_model=SalesReport)
