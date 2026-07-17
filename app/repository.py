@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Literal
 
 from app.models import Product
 
@@ -12,8 +13,31 @@ PRODUCTS = [
 ]
 
 
-def list_products() -> list[Product]:
-    return PRODUCTS.copy()
+SortField = Literal["id", "name", "category", "price"]
+SortOrder = Literal["asc", "desc"]
+
+
+def list_products(
+    *,
+    q: str | None = None,
+    sort: SortField = "id",
+    order: SortOrder = "asc",
+    page: int = 1,
+    page_size: int = 20,
+) -> list[Product]:
+    products = sorted(
+        _filter_products(q=q),
+        key=lambda product: getattr(product, sort),
+        reverse=order == "desc",
+    )
+
+    start = (page - 1) * page_size
+    end = start + page_size
+    return products[start:end]
+
+
+def count_products(*, q: str | None = None) -> int:
+    return len(_filter_products(q=q))
 
 
 def get_product(product_id: int) -> Product | None:
@@ -26,11 +50,7 @@ def create_sales_report_database() -> sqlite3.Connection:
     connection.execute("CREATE TABLE products (id INTEGER, name TEXT, category TEXT, price REAL)")
     connection.executemany(
         "INSERT INTO products VALUES (?, ?, ?, ?)",
-        [
-            (1, "Zenbook 14 OLED", "Laptop", 42900),
-            (2, "ROG Zephyrus G14", "Gaming Laptop", 62900),
-            (3, "ProArt P16", "Creator Laptop", 79900),
-        ],
+        [(product.id, product.name, product.category, product.price) for product in PRODUCTS],
     )
     return connection
 
@@ -48,3 +68,15 @@ def get_sales_report(category: str) -> tuple[list[Product], float]:
     items = [Product.model_validate(dict(row)) for row in rows]
     total = sum(item.price for item in items)
     return items, total
+
+
+def _filter_products(*, q: str | None = None) -> list[Product]:
+    if q is None:
+        return PRODUCTS.copy()
+
+    needle = q.casefold()
+    return [
+        product
+        for product in PRODUCTS
+        if needle in product.name.casefold() or needle in product.category.casefold()
+    ]
