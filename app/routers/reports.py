@@ -22,7 +22,6 @@ def sales_report(
             detail="Could not generate sales report",
         ) from exc
 
-    _ = formula
     return SalesReport(
         category=category,
         items=items,
