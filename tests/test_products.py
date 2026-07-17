@@ -32,6 +32,12 @@ def test_list_products_can_search_by_name_or_category(client: TestClient) -> Non
     ]
 
 
+def test_list_products_accepts_maximum_search_length(client: TestClient) -> None:
+    response = client.get("/products", params={"q": "x" * 100})
+
+    assert response.status_code == 200
+
+
 def test_list_products_can_sort_by_price_descending(client: TestClient) -> None:
     response = client.get("/products", params={"sort": "price", "order": "desc"})
 

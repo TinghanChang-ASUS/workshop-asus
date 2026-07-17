@@ -24,9 +24,11 @@ def list_products(
     page: int = 1,
     page_size: int = 20,
 ) -> list[Product]:
-    products = _filter_products(q=q)
-
-    products.sort(key=lambda product: getattr(product, sort), reverse=order == "desc")
+    products = sorted(
+        _filter_products(q=q),
+        key=lambda product: getattr(product, sort),
+        reverse=order == "desc",
+    )
 
     start = (page - 1) * page_size
     end = start + page_size
