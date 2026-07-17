@@ -19,6 +19,24 @@ def test_list_products(client: TestClient) -> None:
     assert body["items"][0]["name"] == "Zenbook 14 OLED"
 
 
+def test_list_products_can_search_by_name_or_category(client: TestClient) -> None:
+    response = client.get("/products", params={"q": "gaming"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 2
+    assert [item["name"] for item in body["items"]] == [
+        "ROG Zephyrus G14",
+        "TUF Gaming A15",
+    ]
+
+
+def test_list_products_rejects_invalid_page_size(client: TestClient) -> None:
+    response = client.get("/products", params={"page_size": 21})
+
+    assert response.status_code == 422
+
+
 def test_get_product(client: TestClient) -> None:
     response = client.get("/products/2")
 
