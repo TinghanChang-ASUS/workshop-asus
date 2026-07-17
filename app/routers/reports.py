@@ -30,5 +30,5 @@ def read_sales_report(
     return SalesReport(
         category=category,
         items=items,
-        total=total if formula is SalesFormula.total else total,
+        total=total,
     )
