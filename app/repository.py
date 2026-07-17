@@ -10,8 +10,15 @@ PRODUCTS = [
 ]
 
 
-def list_products() -> list[Product]:
-    return PRODUCTS.copy()
+def list_products(q: str | None = None) -> list[Product]:
+    products = PRODUCTS.copy()
+    if q:
+        q_lower = q.lower()
+        products = [
+            p for p in products
+            if q_lower in p.name.lower() or q_lower in p.category.lower()
+        ]
+    return products
 
 
 def get_product(product_id: int) -> Product | None:
