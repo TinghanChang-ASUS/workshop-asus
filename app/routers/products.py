@@ -18,7 +18,7 @@ def read_products(
 ) -> ProductPage:
     products = list_products(q=q)
     if sort is not None:
-        products.sort(key=lambda p: getattr(p, sort), reverse=(order == "desc"))
+        products = sorted(products, key=lambda p: getattr(p, sort), reverse=(order == "desc"))
     total = len(products)
     start = (page - 1) * page_size
     items = products[start : start + page_size]
