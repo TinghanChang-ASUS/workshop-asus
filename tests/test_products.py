@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -31,8 +32,28 @@ def test_list_products_can_search_by_name_or_category(client: TestClient) -> Non
     ]
 
 
-def test_list_products_rejects_invalid_page_size(client: TestClient) -> None:
-    response = client.get("/products", params={"page_size": 21})
+def test_list_products_can_sort_by_price_descending(client: TestClient) -> None:
+    response = client.get("/products", params={"sort": "price", "order": "desc"})
+
+    assert response.status_code == 200
+    assert [item["id"] for item in response.json()["items"][:3]] == [3, 2, 1]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"page": 0},
+        {"page_size": 0},
+        {"page_size": 21},
+        {"q": ""},
+        {"q": "x" * 101},
+    ],
+)
+def test_list_products_rejects_invalid_query_parameter_values(
+    client: TestClient,
+    params: dict[str, object],
+) -> None:
+    response = client.get("/products", params=params)
 
     assert response.status_code == 422
 
