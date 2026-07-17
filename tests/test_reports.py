@@ -1,5 +1,6 @@
 import sqlite3
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.routers import reports
@@ -48,7 +49,7 @@ def test_sales_report_rejects_formula_code_injection(client: TestClient) -> None
 
 def test_sales_report_hides_internal_errors(
     client: TestClient,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def raise_database_error(category: str) -> tuple[list[object], float]:
         raise sqlite3.OperationalError("stack trace details should stay private")

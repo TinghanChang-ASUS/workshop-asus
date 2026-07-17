@@ -46,5 +46,5 @@ def get_sales_report(category: str) -> tuple[list[Product], float]:
         connection.close()
 
     items = [Product.model_validate(dict(row)) for row in rows]
-    total = float(sum(item.price for item in items))
+    total = sum(item.price for item in items)
     return items, total
