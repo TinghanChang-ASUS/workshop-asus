@@ -1,5 +1,6 @@
 import sqlite3
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.routers import reports
@@ -49,7 +50,7 @@ def test_sales_report_blocks_formula_code_injection(client: TestClient) -> None:
 
 def test_sales_report_hides_internal_errors(
     client: TestClient,
-    monkeypatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def raise_database_error(category: str) -> list[object]:
         raise sqlite3.OperationalError("Traceback: /tmp/private.db")
