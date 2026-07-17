@@ -1,3 +1,4 @@
+import sqlite3
 from typing import Literal
 
 from app.models import Product
@@ -41,6 +42,32 @@ def count_products(*, q: str | None = None) -> int:
 
 def get_product(product_id: int) -> Product | None:
     return next((product for product in PRODUCTS if product.id == product_id), None)
+
+
+def create_sales_report_database() -> sqlite3.Connection:
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("CREATE TABLE products (id INTEGER, name TEXT, category TEXT, price REAL)")
+    connection.executemany(
+        "INSERT INTO products VALUES (?, ?, ?, ?)",
+        [(product.id, product.name, product.category, product.price) for product in PRODUCTS],
+    )
+    return connection
+
+
+def get_sales_report(category: str) -> tuple[list[Product], float]:
+    connection = create_sales_report_database()
+    try:
+        rows = connection.execute(
+            "SELECT id, name, category, price FROM products WHERE category = ?",
+            (category,),
+        ).fetchall()
+    finally:
+        connection.close()
+
+    items = [Product.model_validate(dict(row)) for row in rows]
+    total = sum(item.price for item in items)
+    return items, total
 
 
 def _filter_products(*, q: str | None = None) -> list[Product]:
