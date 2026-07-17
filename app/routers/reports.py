@@ -3,10 +3,17 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from app.models import SalesReport
+from app.models import Product, SalesReport
 from app.repository import list_sales_products
 
 router = APIRouter(prefix="/reports", tags=["reports"])
+
+
+def calculate_total(formula: Literal["total"], items: list[Product]) -> float:
+    if formula == "total":
+        return sum((item.price for item in items), start=0.0)
+
+    raise AssertionError("Unsupported formula")
 
 
 @router.get("/sales", response_model=SalesReport)
@@ -25,5 +32,5 @@ def sales_report(
     return SalesReport(
         category=category,
         items=items,
-        total=sum((item.price for item in items), start=0.0),
+        total=calculate_total(formula, items),
     )
