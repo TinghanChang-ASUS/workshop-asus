@@ -17,7 +17,7 @@ class SalesFormula(str, Enum):
 @router.get("/sales", response_model=SalesReport)
 def read_sales_report(
     category: Annotated[str, Query(min_length=1, max_length=100)],
-    formula: SalesFormula = Query(default=SalesFormula.total),
+    formula: Annotated[SalesFormula, Query()] = SalesFormula.total,
 ) -> SalesReport:
     try:
         items, total = get_sales_report(category)
