@@ -1,5 +1,3 @@
-from typing import Literal
-
 from app.models import Product
 
 PRODUCTS = [
@@ -12,44 +10,10 @@ PRODUCTS = [
 ]
 
 
-SortField = Literal["id", "name", "category", "price"]
-SortOrder = Literal["asc", "desc"]
-
-
-def list_products(
-    *,
-    q: str | None = None,
-    sort: SortField = "id",
-    order: SortOrder = "asc",
-    page: int = 1,
-    page_size: int = 20,
-) -> list[Product]:
-    products = sorted(
-        _filter_products(q=q),
-        key=lambda product: getattr(product, sort),
-        reverse=order == "desc",
-    )
-
-    start = (page - 1) * page_size
-    end = start + page_size
-    return products[start:end]
-
-
-def count_products(*, q: str | None = None) -> int:
-    return len(_filter_products(q=q))
+def list_products() -> list[Product]:
+    return PRODUCTS.copy()
 
 
 def get_product(product_id: int) -> Product | None:
     return next((product for product in PRODUCTS if product.id == product_id), None)
 
-
-def _filter_products(*, q: str | None = None) -> list[Product]:
-    if q is None:
-        return PRODUCTS.copy()
-
-    needle = q.casefold()
-    return [
-        product
-        for product in PRODUCTS
-        if needle in product.name.casefold() or needle in product.category.casefold()
-    ]
